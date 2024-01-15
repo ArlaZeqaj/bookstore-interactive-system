@@ -1,0 +1,10 @@
+Bill details:
+Bill No.: 9pefzKUDwKzD
+Retailer name: 
+Purchase date: Mon Jan 15 12:00:02 CET 2024
+Book: The Secret History
+Amount: 1
+Stock No: 23
+Price: 16.5
+Total Cost: 16.5
+
