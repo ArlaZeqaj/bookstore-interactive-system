@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.io.Serializable;
 
 public class Book implements Serializable{
+    private BillUnit billUnit;
     private String ISBN;
     private String title;
     private Category category;
@@ -87,9 +88,7 @@ public class Book implements Serializable{
         this.author = author;
     }
 
-    public void setStockNo(int stockNo) {
-        this.stockNo = stockNo;
-    }
+    public void setStockNo(int stockNo) {this.stockNo = stockNo;}
 
     public void setISBN(String ISBN) {
         if(ValidationUtil.isValid(ISBN, ValidationUtil.ISBN_13_REGEX))

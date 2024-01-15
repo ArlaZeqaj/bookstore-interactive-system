@@ -1,14 +1,20 @@
 package model;
 
+import model.Utility.FileReaderUtil;
+import model.Utility.FileWriterUtil;
+import model.Utility.ValidationUtil;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class SearchBook {
-    private final Scanner scanner; // Add Scanner field
+    private final Scanner scanner;
 
     public SearchBook(Scanner scanner) {
         this.scanner = scanner;
@@ -20,6 +26,37 @@ public class SearchBook {
         System.out.println("2. Search by ISBN");
         System.out.println("3. Search by author");
         System.out.println("4. Search by category");
+    }
+
+    public List<Book> performSearch(int searchChoice, List<Book> books) {
+        List<Book> selectedBooks = new ArrayList<>();
+
+        switch (searchChoice) {
+            case 1:
+                System.out.println("Enter part of the book title you want to search:");
+                String searchTitle = scanner.nextLine().toLowerCase();
+                selectedBooks = findBookByTitle(searchTitle, books);
+                break;
+            case 2:
+                System.out.println("Enter the ISBN of the book:");
+                String searchISBN = scanner.nextLine();
+                selectedBooks = findBookByISBN(searchISBN, books);
+                break;
+            case 3:
+                System.out.println("Enter the name of the author:");
+                String searchAuthor = scanner.nextLine().toLowerCase();
+                selectedBooks = findBookByAuthor(searchAuthor, books);
+                break;
+            case 4:
+                System.out.println("Enter the name of the category:");
+                String searchCategory = scanner.nextLine().toLowerCase();
+                selectedBooks = findBookByCategory(searchCategory, books);
+                break;
+            default:
+                System.out.println("Invalid choice.");
+                break;
+        }
+        return selectedBooks;
     }
 
     public List<Book> findBookByTitle(String searchTitle, List<Book> books) {
@@ -36,70 +73,77 @@ public class SearchBook {
 
     public List<Book> findBookByISBN(String searchISBN, List<Book> books) {
         List<Book> matchingBooks = new ArrayList<>();
-        for (Book book : books) {
-            if (book.getISBN().equals(searchISBN)) {
-                matchingBooks.add(book);
+        if (ValidationUtil.isValid(searchISBN, ValidationUtil.ISBN_13_REGEX)) {
+            for (Book book : books) {
+                if (book.getISBN().equals(searchISBN)) {
+                    matchingBooks.add(book);
+                }
             }
+        } else {
+            System.out.println("Invalid ISBN format. Please enter a valid ISBN.");
         }
         return matchingBooks;
     }
 
     public List<Book> findBookByAuthor(String searchAuthor, List<Book> books) {
         List<Book> matchingBooks = new ArrayList<>();
-        for (Book book : books) {
-            String authorName = book.getAuthor().toString().toLowerCase();
-            if (authorName.contains(searchAuthor)) {
-                matchingBooks.add(book);
+        if (ValidationUtil.isValid(searchAuthor, ValidationUtil.STRING_REGEX)) {
+            String searchAuthorLower = searchAuthor.toLowerCase();
+            for (Book book : books) {
+                String authorName = book.getAuthor().toString().toLowerCase();
+                if (authorName.contains(searchAuthorLower)) {
+                    matchingBooks.add(book);
+                }
             }
+        } else {
+            System.out.println("Invalid author name format. Please enter a valid author name.");
         }
         return matchingBooks;
     }
 
     public List<Book> findBookByCategory(String searchCategory, List<Book> books) {
         List<Book> matchingBooks = new ArrayList<>();
-        for (Book book : books) {
-            String category = book.getCategory().getName().toLowerCase();
-            if (category.equals(searchCategory)) {
-                matchingBooks.add(book);
-            }
-        }
-        return matchingBooks;
-    }
-
-
-
-    private void displayBookDetails(List<Book> selectedBooks, Employee employee) {
-        if (!selectedBooks.isEmpty()) {
-            for (Book selectedBook : selectedBooks) {
-                if (employee.getAccessLevel() == AccessLevel.SIMPLE || employee.getAccessLevel() == AccessLevel.ADVANCED) {
-                    System.out.println(selectedBook);
-                    System.out.print("Enter the amount of books to purchase: "); //input the amount of books needed
-                    int amount = scanner.nextInt();
-                    scanner.nextLine();
-
-                    BillUnit billUnit = new BillUnit(selectedBook,  amount);
-                    Bill bill = new Bill(new BillUnit[]{billUnit});
-
-                    System.out.println("\nBill details:");
-                    System.out.println("Bill No.: " + bill.getBillNo());
-                    System.out.println("Retailer name: ");
-                    System.out.println("Book: " + billUnit.getBook().getTitle());
-                    System.out.println("Purchase date: " + bill.getPurchaseDate());
-                    System.out.println("Amount: " + billUnit.getAmount());
-                    System.out.println("Price: " + billUnit.getBook().getSellingPrice());
-                    System.out.println("Total Cost: " + bill.getTotalCost());
-                    //System.out.println(billUnit);
-                } else {
-                    System.out.println("You don't have access.");
+        if (ValidationUtil.isValid(searchCategory, ValidationUtil.STRING_REGEX)) {
+            String searchCategoryLower = searchCategory.toLowerCase();
+            for (Book book : books) {
+                String category = book.getCategory().getName().toLowerCase();
+                if (category.equals(searchCategoryLower)) {
+                    matchingBooks.add(book);
                 }
             }
+
+            if (!matchingBooks.isEmpty()) {
+                System.out.println("Books under the category '" + searchCategory + "':");
+                for (Book book : matchingBooks) {
+                    System.out.println(book.getTitle());
+                }
+
+                System.out.println("Enter the title of the book you want to create a bill for:");
+                String partialTitle = scanner.nextLine().toLowerCase();
+
+                //convert the list of matching books to a Stream.
+                List<Book> selectedBooks = matchingBooks.stream()
+                        //use the filter operation to select only those books whose title, when converted to lowercase,
+                        //contains the entered partial title. This is a case-insensitive search.
+                        .filter(book -> book.getTitle().toLowerCase().contains(partialTitle))
+                        //collect the filtered books into a new list
+                        .collect(Collectors.toList());
+
+                if (!selectedBooks.isEmpty()) {
+                    //user chose valid book(s), return the selected book(s)
+                    return selectedBooks;
+                } else {
+                    System.out.println("No books with title containing '" + partialTitle + "' found. No bill created.");
+                }
+            } else {
+                System.out.println("No books found under the category '" + searchCategory + "'.");
+            }
         } else {
-            System.out.println("No books found matching the search criteria.");
+            System.out.println("Invalid category format. Please enter a valid category.");
         }
+        return Collections.emptyList();
     }
 
-
-    // Inside SearchBook class
     public void saveBillToFile(Bill bill) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("data/bills/" + bill.getBillNo() + ".txt"))) {
             writer.println("Bill details:");
@@ -108,18 +152,32 @@ public class SearchBook {
             writer.println("Purchase date: " + bill.getPurchaseDate());
 
             for (BillUnit billUnit : bill.getBillUnits()) {
-                    System.out.println(billUnit.getBook());
-                    System.out.print("Enter the amount of books to purchase: "); // Input the amount of books needed
-                    int amount = scanner.nextInt();
-                    scanner.nextLine();
+                System.out.println(billUnit.getBook());
+                System.out.print("Enter the amount of books to purchase: ");
+                int amount = scanner.nextInt();
+                scanner.nextLine();
 
+                //check if the amount is valid before proceeding
+                if (amount > 0) {
+                    //update the stock number after setting the amount in the BillUnit
                     billUnit.setAmount(amount);
+                    //print the updated BillUnit details
+                    System.out.println(billUnit.getBook());
+
+                    //use the correct stock number from the BillUnit's book
                     writer.println("Book: " + billUnit.getBook().getTitle());
                     writer.println("Amount: " + billUnit.getAmount());
+                    writer.println("Stock No: " + billUnit.getBook().getStockNo());
                     writer.println("Price: " + billUnit.getBook().getSellingPrice());
-                    writer.println("Total Cost: " + (billUnit.getAmount() * billUnit.getBook().getSellingPrice()));
-                    writer.println(); // Empty line for separation
+                    writer.println("Total Cost: " + billUnit.getTotalCost());
+                    writer.println();
+                } else {
+                    System.out.println("Skipped adding this book to the bill.");
+                }
             }
+
+            //update stock numbers in the binary file after processing all BillUnits
+            updateStockNumbersInBinaryFile(bill);
 
             System.out.println("Bill details have been saved to bills/" + bill.getBillNo() + ".txt");
         } catch (IOException e) {
@@ -127,4 +185,24 @@ public class SearchBook {
         }
     }
 
+    private void updateStockNumbersInBinaryFile(Bill bill) {
+        List<Book> books = FileReaderUtil.readArrayListFromFile("data/binaryFiles/books.bin");
+
+        for (BillUnit billUnit : bill.getBillUnits()) {
+            Book billBook = billUnit.getBook();
+            int amount = billUnit.getAmount();
+
+            for (Book existingBook : books) {
+                if (existingBook.getISBN().equals(billBook.getISBN())) {
+                    //update the stock number in memory
+                    int updatedStockNo = Math.max(0, existingBook.getStockNo() - amount);
+                    existingBook.setStockNo(updatedStockNo);
+                    break;
+                }
+            }
+        }
+
+        // Write the updated list of books back to the binary file
+        FileWriterUtil.writeArrayListToFile(books, "data/binaryFiles/books.bin");
+    }
 }

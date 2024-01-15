@@ -6,37 +6,57 @@ import model.Utility.FileWriterUtil;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CategoryList implements Serializable {
     @Serial
     private static final long serialVersionUID = 2212749183394620980L;
-    private static List<Category> categories;
-    private static ArrayList<Category> readCategories;
+
+    private List<Category> categories;
+    private static Set<String> existingCategories;  // Use a set to track existing category names
+    private static ArrayList<Category> readCategories;  // Keep it static if necessary
     public static String filePath = "data/binaryFiles/categories.bin";
-    public CategoryList(){
+
+    public CategoryList() {
         categories = new ArrayList<>();
+        existingCategories = new HashSet<>();
         readCategories = FileReaderUtil.readArrayListFromFile(filePath);
-    }
-    public void addCategory(Category category) {
-        readCategories.add(category);
-        FileWriterUtil.writeArrayListToFile(readCategories, filePath);
-    }
-    public boolean hasDuplicate(Category newCategory) {
-        for (Category category : categories) {
-            if (category.equals(newCategory)) {
-                return true;
-            }
-        }
-        return false;
+        categories.addAll(readCategories);
+        categories.forEach(category -> existingCategories.add(category.getName()));  // Populate the set initially
     }
 
-    public static List<Category> getCategories() {
+    public void addCategory(Category category) {
+        if (!hasDuplicate(category)) {
+            categories.add(category);
+            existingCategories.add(category.getName());
+            readCategories.add(category);
+            FileWriterUtil.writeArrayListToFile(readCategories, filePath);
+            System.out.println(category.toString());
+        } else {
+            System.out.println("Category already exists.");
+        }
+    }
+
+    public boolean hasDuplicate(Category newCategory) {
+        return existingCategories.contains(newCategory.getName());
+    }
+
+    public List<Category> getCategories() {
         return categories;
     }
 
-    public static void setCategories(List<Category> categories) {
-        CategoryList.categories = categories;
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
+    }
+
+    public static Set<String> getExistingCategories() {
+        return existingCategories;
+    }
+
+    public static void setExistingCategories(Set<String> existingCategories) {
+        CategoryList.existingCategories = existingCategories;
     }
 
     public static ArrayList<Category> getReadCategories() {
@@ -47,10 +67,9 @@ public class CategoryList implements Serializable {
         CategoryList.readCategories = readCategories;
     }
 
-    public static void printCategories(ArrayList<Category> categories){
+    public void printCategories() {
         for (Category category : categories) {
             System.out.println(category.toString());
-            System.out.println();
         }
     }
 }

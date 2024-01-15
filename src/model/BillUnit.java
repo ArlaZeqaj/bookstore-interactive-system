@@ -1,18 +1,35 @@
 package model;
 
+import model.Utility.FileReaderUtil;
+
+import java.util.List;
+
 public class BillUnit {
     private final Book book;
     private int amount;
-    private final double unitPrice;
+    private double totalCost;
 
     public BillUnit(Book book, int amount) {
-        this.book = book; // Assign the book object passed to the BillUnit
+        this.book = book;
         this.amount = amount;
-        book.setStockNo(book.getStockNo()-amount);
-        this.unitPrice = book.getSellingPrice() * amount;
+        updateTotalCost();
     }
 
-    public Book getBook() {return book;}
+    private void updateTotalCost() {
+        this.totalCost = book.getSellingPrice() * amount;
+    }
+
+    private void updateStockNo(int amount) {
+        if (amount > 0) {
+            int currentStockNo = book.getStockNo();
+            int updatedStockNo = Math.max(0, currentStockNo - amount);
+            book.setStockNo(updatedStockNo);
+        }
+    }
+
+    public Book getBook() {
+        return book;
+    }
 
     public int getAmount() {
         return amount;
@@ -20,17 +37,27 @@ public class BillUnit {
 
     public void setAmount(int amount) {
         this.amount = amount;
+        if (amount > 0) {
+            updateTotalCost();
+            updateStockNo(amount);
+        }
     }
 
-    public double getUnitPrice() {
-        return unitPrice;
+    public double getTotalCost() {
+        return totalCost;
     }
+
+    public int getStockNo() {
+        return book.getStockNo();
+    }
+
     @Override
     public String toString() {
         return "Item: \n" +
-                "book: " + book.getTitle() + "\n" +
-                "price: " + book.getSellingPrice() + "\n" +
-                "amount: " + amount + "\n" +
-                "unitPrice: " + unitPrice + "\n";
+                "Book: " + book.getTitle() + "\n" +
+                "Amount: " + getAmount() + "\n" +
+                "Price per unit: " + book.getSellingPrice() + "\n" +
+                "StockNo: " + getStockNo() + "\n" +
+                "Total Cost: " + getTotalCost();
     }
 }

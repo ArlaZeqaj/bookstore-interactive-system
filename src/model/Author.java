@@ -3,6 +3,8 @@ package model;
 import model.Utility.ValidationUtil;
 
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Author implements Serializable{
     @Serial
@@ -11,7 +13,8 @@ public class Author implements Serializable{
     private String middleName; //author middle name should end with a period ex: J K. Rowling
     private String lastName;
     //ArrayList<Author> authors = new ArrayList<>();
-    public String filename = "data/authors.txt";
+    public String filename = "data/binaryFiles/authors.bin";
+    private static Set<String> existingAuthors = new HashSet<>();
     private AuthorList authorList = new AuthorList();
 
     public Author(String firstName, String middleName, String lastName) {
@@ -20,10 +23,10 @@ public class Author implements Serializable{
         this.middleName = middleName;
         if(ValidationUtil.isValid(lastName, ValidationUtil.STRING_REGEX))
             this.lastName = lastName;
-        if (!authorList.hasDuplicate(this)) {
+        if (!authorList.hasDuplicate(this) && !existingAuthors.contains(firstName + " " + middleName + lastName)) {
+            saveAuthorToFile();
             authorList.addAuthor(this);
-        } else {
-            System.out.println("Author already exists: " + this);
+            existingAuthors.add(firstName + " " + middleName + lastName);
         }
     }
 
@@ -52,47 +55,35 @@ public class Author implements Serializable{
         if(ValidationUtil.isValid(lastName, ValidationUtil.STRING_REGEX))
             this.lastName = lastName;
     }
-/*
-    public ArrayList<Author> getAuthorList() {
-        return authorList;
-    }
+    /*
+        public ArrayList<Author> getAuthorList() {
+            return authorList;
+        }
 
-    public void setAuthorList(ArrayList<Author> authorList) {
-        this.authorList = authorList;
-    }
+        public void setAuthorList(ArrayList<Author> authorList) {
+            this.authorList = authorList;
+        }
 
-    public void add(Author author) {
-        authorList.add(author);
-    }
- */
+        public void add(Author author) {
+            authorList.add(author);
+        }
+     */
     @Override
     public String toString() {
         return firstName + " " + middleName  + lastName;
     }
+
     private void saveAuthorToFile() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line;
-            boolean authorExists = false;
-            while ((line = reader.readLine()) != null) {
-                if (line.equals(firstName)) {
-                    authorExists = true;
-                    break;
-                }
+        File file = new File(filename);
+        boolean fileIsEmpty = !file.exists() || file.length() == 0;
+
+        if (fileIsEmpty || (!authorList.hasDuplicate(this) && !existingAuthors.contains(firstName + " " + middleName  + lastName))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
+                writer.write(firstName + " " + middleName + lastName);
+                writer.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            if (!authorExists) {
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-                    writer.write(firstName + " " + middleName + lastName);
-                    writer.newLine();
-                    System.out.println("Author saved successfully.");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("Author already exists.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
-
 }

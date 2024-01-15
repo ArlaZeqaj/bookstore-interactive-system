@@ -1,6 +1,5 @@
 package model;
 
-//secureRandom generates secure random numbers, with a lower chance of repeating compared to math random
 import java.security.SecureRandom;
 import java.util.Date;
 
@@ -8,14 +7,11 @@ public class Bill {
     private final String billNo;
     private BillUnit[] billUnits;
     private final Date purchaseDate;
-    private final double totalCost;
-
 
     public Bill(BillUnit[] billUnits) {
-        this.billNo = generateRandomBillNumber(12); //generates a 9-character bill number
+        this.billNo = generateRandomBillNumber(12);
         this.billUnits = billUnits;
         this.purchaseDate = new Date();
-        this.totalCost = calculateTotalCost(); //calculate by adding cost all bill units
     }
 
     public String getBillNo() {
@@ -26,7 +22,7 @@ public class Bill {
         return billUnits;
     }
 
-    public void setBooks(BillUnit[] billUnits) {
+    public void setBillUnits(BillUnit[] billUnits) {
         this.billUnits = billUnits;
     }
 
@@ -34,13 +30,15 @@ public class Bill {
         return purchaseDate;
     }
 
-    private double calculateTotalCost() {
-        double total = 0.0;
-        for (BillUnit unit : billUnits) {
-            total += unit.getUnitPrice();
+    public void updateStockNumbers() {
+        for (BillUnit billUnit : billUnits) {
+            Book book = billUnit.getBook();
+            int amount = billUnit.getAmount();
+            int updatedStockNo = Math.max(0, book.getStockNo() - amount);
+            book.setStockNo(updatedStockNo);
         }
-        return total;
     }
+
     private static final String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     public static String generateRandomBillNumber(int length) {
@@ -54,10 +52,4 @@ public class Bill {
 
         return stringBuilder.toString();
     }
-
-    public double getTotalCost() {
-        return totalCost;
-    }
-
-
 }

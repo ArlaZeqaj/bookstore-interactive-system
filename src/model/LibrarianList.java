@@ -33,12 +33,15 @@ public class LibrarianList {
     }
 
     public ArrayList<Librarian> getReadLibrarians() {
+
         return FileReaderUtil.readArrayListFromFile(filePath);
     }
 
     public void setReadLibrarians(ArrayList<Librarian> readLibrarians) {
+
         this.readLibrarians = readLibrarians;
     }
+
     public static void printLibrariansFromFile(ArrayList<Librarian> readLibrarians){
         System.out.println("ArrayList of librarians from file: " + filePath);
         for (Librarian librarian : readLibrarians) {
