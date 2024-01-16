@@ -30,6 +30,10 @@ public class Author implements Serializable{
         }
     }
 
+    public Author(String text) {
+
+    }
+
     public String getFirstName() {
         return firstName;
     }

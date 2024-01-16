@@ -7,18 +7,17 @@ import java.time.LocalDate;
 import java.io.Serializable;
 
 public class Book implements Serializable{
-    private BillUnit billUnit;
     private String ISBN;
     private String title;
-    private Category category;
+    private String category;
     private String supplierName;
     //added the book publication year
     private Year publishYear;
     private final LocalDate purchasedDate;
-    private final double purchasedPrice;
-    private final double originalPrice;
+    private double purchasedPrice;
+    private double originalPrice;
     private double sellingPrice;
-    private Author author;
+    private String author;
     private int stockNo;
 
     public Book(String ISBN, String title, Category category, String supplierName, Year publishYear, double purchasedPrice, double originalPrice, double sellingPrice, Author author, int stockNo) {
@@ -27,7 +26,7 @@ public class Book implements Serializable{
         if(ValidationUtil.isValid(title, ValidationUtil.BOOK_TITLE_REGEX))
             this.title = title;
         if(ValidationUtil.isValid(category.getName(), ValidationUtil.STRING_REGEX))
-            this.category = category;
+            this.category = String.valueOf(category);
         if(ValidationUtil.isValid(supplierName, ValidationUtil.BOOK_TITLE_REGEX))
             this.supplierName = supplierName;
         this.publishYear = publishYear;
@@ -36,7 +35,7 @@ public class Book implements Serializable{
         this.originalPrice = originalPrice;
         this.sellingPrice = sellingPrice;
         if(ValidationUtil.isValid(author.toString(), ValidationUtil.BOOK_TITLE_REGEX))
-            this.author = author;
+            this.author = String.valueOf(author);
         this.stockNo = stockNo;
     }
 
@@ -48,7 +47,7 @@ public class Book implements Serializable{
         return title;
     }
 
-    public Category getCategory() {
+    public String getCategory() {
         return category;
     }
 
@@ -76,7 +75,7 @@ public class Book implements Serializable{
         return sellingPrice;
     }
 
-    public Author getAuthor() {
+    public String getAuthor() {
         return author;
     }
 
@@ -84,7 +83,7 @@ public class Book implements Serializable{
         return stockNo;
     }
 
-    public void setAuthor(Author author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
@@ -99,7 +98,7 @@ public class Book implements Serializable{
         this.title = title;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(String category) {
         this.category = category;
     }
 
@@ -112,6 +111,14 @@ public class Book implements Serializable{
     }
     public void setSellingPrice(double sellingPrice) {
         this.sellingPrice = sellingPrice;
+    }
+
+    public void setPurchasedPrice(double purchasedPrice) {
+        this.purchasedPrice = purchasedPrice;
+    }
+
+    public void setOriginalPrice(double originalPrice) {
+        this.originalPrice = originalPrice;
     }
 
     @Override

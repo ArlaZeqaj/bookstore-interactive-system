@@ -1,6 +1,5 @@
 package view;
 
-import controller.LoginFormController;
 import controller.UserDashboardController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,7 +36,10 @@ public class BooksView {
             assert employee != null;
             ProfileView.showProfileView(primaryStage, employee);
         });
-        btnBooks.setOnAction(e -> showBooksTable(primaryStage, books, employee));
+        if(employee instanceof Librarian)
+            btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        else if(employee instanceof Manager)
+            btnBooks.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
         btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
@@ -60,7 +62,8 @@ public class BooksView {
         TableColumn<Book, String> ISBNColumn = new TableColumn<>("ISBN");
         TableColumn<Book, String> categoryColumn = new TableColumn<>("Category");
         TableColumn<Book, Double> costColumn = new TableColumn<>("Cost");
-        TableColumn<Book, Double> sellingPriceColumn = new TableColumn<>("Price");
+        TableColumn<Book, Double> initialPriceColumn = new TableColumn<>("Initial price");
+        TableColumn<Book, Double> sellingPriceColumn = new TableColumn<>("Actual price");
         TableColumn<Book, Integer> stockNoColumn = new TableColumn<>("Stock");
         TableColumn<Book, String> supplierColumn = new TableColumn<>("Supplier");
         TableColumn<Book, LocalDate> dateColumn = new TableColumn<>("Date");
@@ -77,8 +80,9 @@ public class BooksView {
         stockNoColumn.setCellValueFactory(new PropertyValueFactory<>("stockNo"));
         supplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplierName"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("purchasedDate"));
+        initialPriceColumn.setCellValueFactory(new PropertyValueFactory<>("originalPrice"));
 
-        tableView.getColumns().addAll(ISBNColumn, titleColumn, authorColumn, yearColumn, supplierColumn, categoryColumn, costColumn, sellingPriceColumn, stockNoColumn, dateColumn);
+        tableView.getColumns().addAll(ISBNColumn, titleColumn, authorColumn, yearColumn, supplierColumn, categoryColumn, costColumn, initialPriceColumn, sellingPriceColumn, stockNoColumn, dateColumn);
 
         ObservableList<Book> bookData = FXCollections.observableArrayList(books);
 
@@ -98,19 +102,5 @@ public class BooksView {
         Scene dashboardScene = new Scene(dashboardLayout, 1000, 600);
         dashboardScene.getStylesheets().add(UserDashboardView.class.getResource("styles.css").toExternalForm());
         primaryStage.setScene(dashboardScene);
-    }
-
-    public static void checkUserType(Stage primaryStage, User currentUser) {
-        Employee employee;
-        if (currentUser instanceof Librarian) {
-            employee = (Librarian) currentUser;
-        } else if (currentUser instanceof Manager) {
-            employee = (Manager) currentUser;
-        } else {
-            employee = null;
-            if (currentUser instanceof Admin) {
-                UserDashboardView.showUserDashboard(primaryStage, (Admin) currentUser);
-            }
-        }
     }
 }

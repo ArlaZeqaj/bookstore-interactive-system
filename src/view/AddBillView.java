@@ -13,6 +13,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.Book;
 import model.Employee;
+import model.Librarian;
+import model.Manager;
 
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
@@ -28,7 +30,11 @@ public class AddBillView {
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
 
         Button btnProfile = new Button("Profile");
-        Button btnBooks = new Button("Books");
+        Button btnBooks = new Button();
+        if(employee instanceof Librarian)
+            btnBooks = new Button("Books");
+        else if(employee instanceof Manager)
+            btnBooks = new Button("Inventory");
         Button btnBill = new Button("Create bill");
         Button logoutButton = new Button("Logout");
 
@@ -38,7 +44,10 @@ public class AddBillView {
             assert employee != null;
             ProfileView.showProfileView(primaryStage, employee);
         });
-        btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        if(employee instanceof Librarian)
+            btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        else if(employee instanceof Manager)
+            btnBooks.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
         btnBill.setOnAction(e -> showAlert("Settings button clicked"));
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));

@@ -26,14 +26,21 @@ public class ProfileView {
     public static void showProfileView(Stage primaryStage, Employee employee) {
         String illustrationPath;
         Button btnProfile = new Button("Profile");
-        Button btnBooks = new Button("Books");
+        Button btnBooks = new Button();
+        if(employee instanceof Librarian)
+            btnBooks = new Button("Books");
+        else if(employee instanceof Manager)
+            btnBooks = new Button("Inventory");
         Button btnBill = new Button("Create bill");
         Button logoutButton = new Button("Logout");
 
         HBox hbox = new HBox(10); //spacing between buttons
         hbox.getChildren().addAll(btnProfile, btnBooks,btnBill, logoutButton);
 
-        btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        if(employee instanceof Librarian)
+            btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        else if(employee instanceof Manager)
+            btnBooks.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
         btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         VBox dashboardLayout = new VBox(20);
         dashboardLayout.setAlignment(Pos.TOP_CENTER);

@@ -106,7 +106,7 @@ public class SearchBook {
         if (ValidationUtil.isValid(searchCategory, ValidationUtil.STRING_REGEX)) {
             String searchCategoryLower = searchCategory.toLowerCase();
             for (Book book : books) {
-                String category = book.getCategory().getName().toLowerCase();
+                String category = book.getCategory().toLowerCase();
                 if (category.equals(searchCategoryLower)) {
                     matchingBooks.add(book);
                 }
@@ -121,16 +121,11 @@ public class SearchBook {
                 System.out.println("Enter the title of the book you want to create a bill for:");
                 String partialTitle = scanner.nextLine().toLowerCase();
 
-                //convert the list of matching books to a Stream.
                 List<Book> selectedBooks = matchingBooks.stream()
-                        //use the filter operation to select only those books whose title, when converted to lowercase,
-                        //contains the entered partial title. This is a case-insensitive search.
                         .filter(book -> book.getTitle().toLowerCase().contains(partialTitle))
-                        //collect the filtered books into a new list
                         .collect(Collectors.toList());
 
                 if (!selectedBooks.isEmpty()) {
-                    //user chose valid book(s), return the selected book(s)
                     return selectedBooks;
                 } else {
                     System.out.println("No books with title containing '" + partialTitle + "' found. No bill created.");
@@ -157,14 +152,10 @@ public class SearchBook {
                 int amount = scanner.nextInt();
                 scanner.nextLine();
 
-                //check if the amount is valid before proceeding
                 if (amount > 0) {
-                    //update the stock number after setting the amount in the BillUnit
                     billUnit.setAmount(amount);
-                    //print the updated BillUnit details
                     System.out.println(billUnit.getBook());
 
-                    //use the correct stock number from the BillUnit's book
                     writer.println("Book: " + billUnit.getBook().getTitle());
                     writer.println("Amount: " + billUnit.getAmount());
                     writer.println("Stock No: " + billUnit.getBook().getStockNo());
@@ -202,7 +193,6 @@ public class SearchBook {
             }
         }
 
-        // Write the updated list of books back to the binary file
         FileWriterUtil.writeArrayListToFile(books, "data/binaryFiles/books.bin");
     }
 }

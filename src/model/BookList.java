@@ -15,7 +15,7 @@ public class BookList {
 
     public BookList() {
         books = new ArrayList<>();
-        initializeBooks();
+        //initializeBooks();
         readBooks = FileReaderUtil.readArrayListFromFile(filePath);
         printBooksFromFile(readBooks);
     }

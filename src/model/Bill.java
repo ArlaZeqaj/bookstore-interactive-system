@@ -38,18 +38,15 @@ public class Bill {
             book.setStockNo(updatedStockNo);
         }
     }
-
     private static final String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     public static String generateRandomBillNumber(int length) {
         SecureRandom random = new SecureRandom();
         StringBuilder stringBuilder = new StringBuilder(length);
-
         for (int i = 0; i < length; i++) {
             int randomIndex = random.nextInt(ALLOWED_CHARACTERS.length());
             stringBuilder.append(ALLOWED_CHARACTERS.charAt(randomIndex));
         }
-
         return stringBuilder.toString();
     }
 }
