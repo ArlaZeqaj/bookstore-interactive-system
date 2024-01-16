@@ -77,4 +77,11 @@
     -fx-font-weight: bold;
 }
 
+#custom-alert {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #6C63FF;
+    -fx-border-radius: 10px;
+}
+
+
 

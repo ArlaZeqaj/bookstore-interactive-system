@@ -1,5 +1,6 @@
 package view;
 
+import controller.LoginFormController;
 import controller.UserDashboardController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,18 +12,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import model.Book;
-import model.Employee;
-
+import model.*;
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 
-import static view.UserDashboardView.*;
+import static view.UserDashboardView.filterBooks;
 
-public class AddBillView {
-    static void createBillTable(Stage primaryStage, List<Book> books, Employee employee) {
+public class BooksView {
+    static void showBooksTable(Stage primaryStage, List<Book> books, Employee employee) {
         VBox dashboardLayout = new VBox(20);
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
@@ -38,8 +37,8 @@ public class AddBillView {
             assert employee != null;
             ProfileView.showProfileView(primaryStage, employee);
         });
-        btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
-        btnBill.setOnAction(e -> showAlert("Settings button clicked"));
+        btnBooks.setOnAction(e -> showBooksTable(primaryStage, books, employee));
+        btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
 
@@ -87,34 +86,31 @@ public class AddBillView {
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search by title, ISBN, author or category...");
-        searchField.setMaxWidth(600);
+        searchField.setMaxWidth(350);
 
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> tableView.setItems(filterBooks(bookData, newValue)));
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            tableView.setItems(filterBooks(bookData, newValue));
+        });
 
-        Label quantityLabel = new Label("Quantity:");
-        Spinner<Integer> quantitySpinner = new Spinner<>(1, 100, 1);
-        quantitySpinner.setMaxWidth(75);
-        Button btnAddToBill = new Button("Add to Bill");
-        btnAddToBill.setOnAction(e -> addToBill(tableView.getSelectionModel().getSelectedItem(), quantitySpinner.getValue()));
-        Button btnFinishBill = new Button("Finish Bill");
-        HBox billOptions = new HBox(10);
-        billOptions.getChildren().addAll(searchField, quantityLabel, quantitySpinner, btnAddToBill, btnFinishBill);
         dashboardLayout.getChildren().clear();
-        dashboardLayout.getChildren().addAll(hbox, titleLabel, tableView, billOptions);
+        dashboardLayout.getChildren().addAll(hbox, titleLabel, tableView, searchField);
 
         Scene dashboardScene = new Scene(dashboardLayout, 1000, 600);
         dashboardScene.getStylesheets().add(UserDashboardView.class.getResource("styles.css").toExternalForm());
         primaryStage.setScene(dashboardScene);
     }
-    private static void addToBill(Book selectedBook, int quantity){
-        if (selectedBook != null) {
-            try {
-                showAlert("Book added to the bill: " + selectedBook.getTitle() + ", Quantity: " + quantity);
-            } catch (NumberFormatException ex) {
-                showAlert("Please enter a valid quantity.");
-            }
+
+    public static void checkUserType(Stage primaryStage, User currentUser) {
+        Employee employee;
+        if (currentUser instanceof Librarian) {
+            employee = (Librarian) currentUser;
+        } else if (currentUser instanceof Manager) {
+            employee = (Manager) currentUser;
         } else {
-            showAlert("Please select a book to add to the bill.");
+            employee = null;
+            if (currentUser instanceof Admin) {
+                UserDashboardView.showUserDashboard(primaryStage, (Admin) currentUser);
+            }
         }
     }
 }

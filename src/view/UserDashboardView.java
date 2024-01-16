@@ -61,7 +61,7 @@ public class UserDashboardView {
             showProfileView(primaryStage, employee);
         });
         btnBooks.setOnAction(e -> showBooksTable(primaryStage, books));
-        btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books));
+        btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         VBox dashboardLayout = new VBox(20);
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
@@ -107,6 +107,11 @@ public class UserDashboardView {
         alert.setTitle("User Dashboard");
         alert.setHeaderText(null);
         alert.setContentText(message);
+
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setId("custom-alert");
+        dialogPane.getStylesheets().add(UserDashboardView.class.getResource("styles.css").toExternalForm());
+
         alert.showAndWait();
     }
     static void showBooksTable(Stage primaryStage, List<Book> books) {
@@ -119,7 +124,7 @@ public class UserDashboardView {
         Button btnBill = new Button("Create bill");
         Button logoutButton = new Button("Logout");
 
-        HBox hbox = new HBox(10); //spacing between buttons
+        HBox hbox = new HBox(10);
         hbox.getChildren().addAll(btnProfile, btnBooks,btnBill, logoutButton);
         btnBooks.setOnAction(e -> showBooksTable(primaryStage, books));
         btnBill.setOnAction(e -> showAlert("Settings button clicked"));

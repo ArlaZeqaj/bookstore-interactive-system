@@ -33,8 +33,8 @@ public class ProfileView {
         HBox hbox = new HBox(10); //spacing between buttons
         hbox.getChildren().addAll(btnProfile, btnBooks,btnBill, logoutButton);
 
-        btnBooks.setOnAction(e -> showBooksTable(primaryStage, books));
-        btnBill.setOnAction(e -> showAlert("Settings button clicked"));
+        btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         VBox dashboardLayout = new VBox(20);
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
