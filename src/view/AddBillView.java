@@ -82,25 +82,32 @@ public class AddBillView {
 
         TextField searchField = new TextField();
         searchField.setPromptText("Search by title, ISBN, author or category...");
-        searchField.setMaxWidth(350);
+        searchField.setMaxWidth(600);
 
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            tableView.setItems(filterBooks(bookData, newValue));
-        });
-        hbox.getChildren().addAll(btnProfile, btnBooks, btnBill, logoutButton);
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> tableView.setItems(filterBooks(bookData, newValue)));
 
+        Label quantityLabel = new Label("Quantity:");
+        Spinner<Integer> quantitySpinner = new Spinner<>(1, 100, 1);
+        quantitySpinner.setMaxWidth(75);
         Button btnAddToBill = new Button("Add to Bill");
-        btnAddToBill.setOnAction(e -> addToBill(tableView.getSelectionModel().getSelectedItem()));
+        btnAddToBill.setOnAction(e -> addToBill(tableView.getSelectionModel().getSelectedItem(), quantitySpinner.getValue()));
+        Button btnFinishBill = new Button("Finish Bill");
+        HBox billOptions = new HBox(10);
+        billOptions.getChildren().addAll(searchField, quantityLabel, quantitySpinner, btnAddToBill, btnFinishBill);
         dashboardLayout.getChildren().clear();
-        dashboardLayout.getChildren().addAll(hbox, titleLabel, tableView, searchField);
+        dashboardLayout.getChildren().addAll(hbox, titleLabel, tableView, billOptions);
 
         Scene dashboardScene = new Scene(dashboardLayout, 1000, 600);
         dashboardScene.getStylesheets().add(UserDashboardView.class.getResource("styles.css").toExternalForm());
         primaryStage.setScene(dashboardScene);
     }
-    private static void addToBill(Book selectedBook) {
+    private static void addToBill(Book selectedBook, int quantity){
         if (selectedBook != null) {
-            showAlert("Book added to the bill: " + selectedBook.getTitle());
+            try {
+                showAlert("Book added to the bill: " + selectedBook.getTitle() + ", Quantity: " + quantity);
+            } catch (NumberFormatException ex) {
+                showAlert("Please enter a valid quantity.");
+            }
         } else {
             showAlert("Please select a book to add to the bill.");
         }
