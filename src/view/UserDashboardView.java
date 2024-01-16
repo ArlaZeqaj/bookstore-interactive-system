@@ -44,7 +44,7 @@ public class UserDashboardView {
         } else {
             employee = null;
             if (currentUser instanceof Admin) {
-                UserDashboardView.showUserDashboard(primaryStage, (Admin) currentUser);
+                AdminView.showUserDashboard(primaryStage);
             }
         }
         Button btnProfile = new Button("Profile");

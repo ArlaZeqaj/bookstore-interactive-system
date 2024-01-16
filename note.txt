@@ -1,0 +1,3 @@
+admin: arlazeqaj 00000
+manager: erionmolla 4444
+librarian: saramolla 1234
