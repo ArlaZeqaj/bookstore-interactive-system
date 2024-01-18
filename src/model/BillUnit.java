@@ -2,9 +2,10 @@ package model;
 
 import model.Utility.FileReaderUtil;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class BillUnit {
+public class BillUnit implements Serializable {
     private final Book book;
     private int amount;
     private double totalCost;

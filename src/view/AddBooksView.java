@@ -35,6 +35,7 @@ public class AddBooksView {
         Button btnProfile = new Button("Profile");
         Button btnBill = new Button("Create bill");
         Button btnInventory = new Button("Inventory");
+        Button btnStatistics = new Button("Statistics");
         Button logoutButton = new Button("Logout");
 
         HBox hbox = new HBox(10); //spacing between buttons
@@ -51,6 +52,10 @@ public class AddBooksView {
         btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
         btnInventory.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
         btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
+        btnStatistics.setOnAction(e -> {
+            StatisticsView.showStatisticsView(primaryStage, employee);
+        });
+
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
 
@@ -207,7 +212,7 @@ public class AddBooksView {
                 new HBox(10, new Label("Stock number:"), stockField),
                 addBookButton,
                 updateBookButton
-                );
+        );
 
         dashboardLayout.getChildren().clear();
         dashboardLayout.getChildren().addAll(hbox, titleLabel, tableView, addBookForm);

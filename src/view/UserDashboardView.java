@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import model.*;
+import model.Utility.FileReaderUtil;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import static view.ProfileView.showProfileView;
 
@@ -31,6 +33,7 @@ public class UserDashboardView {
     User currentUser = loginFormController.getCurrentUser();
     static List<Book> books = new BookList().getReadBooks();
     static List<String> roles;
+    private static boolean lowStockAlertShown = false;
 
     public static void showUserDashboard(Stage primaryStage, User currentUser) {
         Employee employee;
@@ -40,12 +43,20 @@ public class UserDashboardView {
         } else if (currentUser instanceof Manager) {
             employee = (Manager) currentUser;
             roles = Roles.getManagerRoles();
+            // Call checkLowStockBooks only if the alert hasn't been shown before
+            if (!lowStockAlertShown) {
+                TextArea lowStockTextArea = new TextArea();
+                checkLowStockBooks(primaryStage, employee, lowStockTextArea);
+                // Set the flag to true after showing the alert
+                lowStockAlertShown = true;
+            }
         } else {
             employee = null;
             if (currentUser instanceof Admin) {
                 AdminView.showUserDashboard(primaryStage);
             }
         }
+
         Button btnProfile = new Button("Profile");
         Button btnBooks = new Button("Books");
         Button btnBill = new Button("Create bill");
@@ -107,6 +118,61 @@ public class UserDashboardView {
         dashboardScene.getStylesheets().add(UserDashboardView.class.getResource("styles.css").toExternalForm());
         primaryStage.setScene(dashboardScene);
     }
+
+    public static void checkLowStockBooks(Stage primaryStage, User currentUser, TextArea lowStockTextArea) {
+        if (currentUser instanceof Employee) {
+            Employee employee = (Employee) currentUser;
+            List<Book> books = FileReaderUtil.readArrayListFromFile("data/binaryFiles/books.bin");
+
+            StringBuilder lowStockBooksInfo = new StringBuilder();
+
+            boolean showAlert = true; // Flag to track whether to show the alert
+
+            for (Book book : books) {
+                System.out.println("Checking book: " + book.getTitle()); // Log statement
+
+                if (book.getStockNo() <= 5) {
+                    // Append book information to the StringBuilder
+                    lowStockBooksInfo.append("Book Title: ").append(book.getTitle()).append("\n")
+                            .append("Author: ").append(book.getAuthor().toString()).append("\n")
+                            .append("Stock No: ").append(book.getStockNo()).append("\n\n");
+                }
+            }
+
+            // Show low stock books in the TextArea
+            lowStockTextArea.setText(lowStockBooksInfo.toString());
+
+            // Display an alert if there are low stock books and the showAlert flag is true
+            if (lowStockBooksInfo.length() > 0 && showAlert) {
+                showAlertForLowStockBooks(primaryStage, employee, lowStockBooksInfo.toString());
+
+                // Set the showAlert flag to false after showing the alert
+                showAlert = false;
+            }
+        }
+    }
+
+    private static void showAlertForLowStockBooks(Stage primaryStage, Employee employee, String booksInfo) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Low Stock Alert");
+        alert.setHeaderText("Books with Low Stock");
+        alert.setContentText(booksInfo);
+
+        ButtonType OKButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType closeButton = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(OKButton, closeButton);
+
+        // Handle button click event
+        Optional<ButtonType> result = alert.showAndWait();
+
+        // Handle the result
+        if (result.isPresent() && result.get() == OKButton) {
+            System.out.println("OK Button Clicked");
+        } else {
+            System.out.println("Close Button Clicked");
+        }
+    }
+
     static void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("User Dashboard");

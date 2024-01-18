@@ -1,17 +1,20 @@
 package model;
 
+import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.Date;
 
-public class Bill {
+public class Bill implements Serializable {
     private final String billNo;
     private BillUnit[] billUnits;
     private final Date purchaseDate;
+    //private double finalTotalCost;
 
     public Bill(BillUnit[] billUnits) {
         this.billNo = generateRandomBillNumber(12);
         this.billUnits = billUnits;
         this.purchaseDate = new Date();
+        //calculateFinalTotalCost();
     }
 
     public String getBillNo() {
@@ -24,20 +27,31 @@ public class Bill {
 
     public void setBillUnits(BillUnit[] billUnits) {
         this.billUnits = billUnits;
+        //calculateFinalTotalCost();
     }
 
     public Date getPurchaseDate() {
         return purchaseDate;
     }
 
-    public void updateStockNumbers() {
-        for (BillUnit billUnit : billUnits) {
-            Book book = billUnit.getBook();
-            int amount = billUnit.getAmount();
-            int updatedStockNo = Math.max(0, book.getStockNo() - amount);
-            book.setStockNo(updatedStockNo);
+    /*
+    public void setFinalTotalCost(double finalTotalCost) {
+        this.finalTotalCost = finalTotalCost;
+    }
+
+    public double getFinalTotalCost() {
+        return finalTotalCost;
+    }
+
+    public void calculateFinalTotalCost() {
+        finalTotalCost = 0;
+        for (BillUnit unit : billUnits) {
+            finalTotalCost += unit.getTotalCost();
         }
     }
+
+     */
+
     private static final String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     public static String generateRandomBillNumber(int length) {
