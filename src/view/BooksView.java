@@ -18,26 +18,36 @@ import java.time.Year;
 import java.util.List;
 
 public class BooksView {
+    static List<String> roles;
     static void showBooksTable(Stage primaryStage, List<Book> books, Employee employee) {
+        if (employee instanceof Librarian) {
+            roles = Roles.getLibrarianRoles();
+        } else if (employee instanceof Manager) {
+            roles = Roles.getManagerRoles();
+        }
         VBox dashboardLayout = new VBox(20);
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
 
-        Button btnProfile = new Button("Profile");
         Button btnBooks = new Button("Books");
+        Button btnProfile = new Button("Profile");
         Button btnBill = new Button("Create bill");
+        Button btnInventory = new Button("Inventory");
         Button logoutButton = new Button("Logout");
 
-        HBox hbox = new HBox(10); //spacing between buttons
-        hbox.getChildren().addAll(btnProfile, btnBooks,btnBill, logoutButton);
+        HBox hbox = new HBox(10);
+        hbox.getChildren().addAll(btnProfile, btnBooks);
+        if(roles.contains("Create Bill"))
+            hbox.getChildren().add(btnBill);
+        if(roles.contains("Add new books"))
+            hbox.getChildren().add(btnInventory);
+        hbox.getChildren().add(logoutButton);
         btnProfile.setOnAction(e -> {
             assert employee != null;
             ProfileView.showProfileView(primaryStage, employee);
         });
-        if(employee instanceof Librarian)
-            btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
-        else if(employee instanceof Manager)
-            btnBooks.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
+        btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        btnInventory.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
         btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));

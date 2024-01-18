@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.AccessLevel;
 import model.Librarian;
+import org.w3c.dom.Text;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.util.List;
 
+import static view.AdminView.librarians;
 import static view.AdminView.managers;
 import static view.UserDashboardView.showAlert;
 
@@ -48,6 +50,7 @@ public class LibrariansView {
             }
         });
         btnManagers.setOnAction(e -> ManagersView.showManagersTable(primaryStage, managers));
+        btnManageRoles.setOnAction(e -> ManageRolesView.showManageRoles(primaryStage, librarians, managers));
 
         Label titleLabel = new Label("Librarian List");
         titleLabel.getStyleClass().add("text-header");
@@ -60,8 +63,10 @@ public class LibrariansView {
         TableColumn<Librarian, String> emailColumn = new TableColumn<>("Email");
         TableColumn<Librarian, Double> salaryColumn = new TableColumn<>("Salary");
         TableColumn<Librarian, AccessLevel> accessLevelColumn = new TableColumn<>("Access Level");
+        TableColumn<Librarian, String> passwordColumn = new TableColumn<>("Password");
 
         tableView.setId("tableView");
+        tableView.setPrefWidth(1000);
 
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         surnameColumn.setCellValueFactory(new PropertyValueFactory<>("surname"));
@@ -70,8 +75,9 @@ public class LibrariansView {
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         salaryColumn.setCellValueFactory(new PropertyValueFactory<>("salary"));
         accessLevelColumn.setCellValueFactory(new PropertyValueFactory<>("accessLevel"));
+        passwordColumn.setCellValueFactory(new PropertyValueFactory<>("password"));
 
-        tableView.getColumns().addAll(nameColumn, surnameColumn, birthDateColumn, phoneNumberColumn, emailColumn, salaryColumn, accessLevelColumn);
+        tableView.getColumns().addAll(nameColumn, surnameColumn, birthDateColumn, phoneNumberColumn, emailColumn, salaryColumn, accessLevelColumn, passwordColumn);
 
         ObservableList<Librarian> librarianData = FXCollections.observableArrayList(librarians);
 
@@ -84,11 +90,12 @@ public class LibrariansView {
         TextField phoneNumberField = new TextField();
         TextField salaryField = new TextField();
         ComboBox<AccessLevel> accessLevelComboBox = new ComboBox<>(FXCollections.observableArrayList(AccessLevel.values()));
+        TextField passwordField = new TextField();
 
         Button addEmployeeButton = new Button("Add Employee");
         addEmployeeButton.setOnAction(e -> {
             try {
-                addEmployeeToTableView(tableView, librarians, nameField, surnameField, birthDateField, phoneNumberField, salaryField, accessLevelComboBox);
+                addEmployeeToTableView(tableView, librarians, nameField, surnameField, birthDateField, phoneNumberField, salaryField, accessLevelComboBox, passwordField);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -104,6 +111,7 @@ public class LibrariansView {
                 new HBox(10, new Label("Phone Number:"), phoneNumberField),
                 new HBox(10, new Label("Salary:"), salaryField),
                 new HBox(10, new Label("Access Level:"), accessLevelComboBox),
+                new HBox(10, new Label("Password:"), passwordField),
                 addEmployeeButton
         );
 
@@ -117,15 +125,16 @@ public class LibrariansView {
         primaryStage.setScene(dashboardScene);
     }
 
-    private static void addEmployeeToTableView(TableView<Librarian> tableView, List<Librarian> librarians, TextField nameField, TextField surnameField, DatePicker birthDateField, TextField phoneNumberField, TextField salaryField, ComboBox<AccessLevel> accessLevelComboBox) throws IOException {
+    private static void addEmployeeToTableView(TableView<Librarian> tableView, List<Librarian> librarians, TextField nameField, TextField surnameField, DatePicker birthDateField, TextField phoneNumberField, TextField salaryField, ComboBox<AccessLevel> accessLevelComboBox, TextField passwordField) throws IOException {
         String name = nameField.getText();
         String surname = surnameField.getText();
         LocalDate birthDate = birthDateField.getValue();
         String phoneNumber = phoneNumberField.getText();
         double salary = Double.parseDouble(salaryField.getText());
         AccessLevel accessLevel = accessLevelComboBox.getValue();
+        String password = passwordField.getText();
 
-        Librarian newEmployee = new Librarian(name, surname, birthDate, phoneNumber, salary, "password");
+        Librarian newEmployee = new Librarian(name, surname, birthDate, phoneNumber, salary, password);
 
         librarians.add(newEmployee);
         tableView.getItems().add(newEmployee);
@@ -142,5 +151,6 @@ public class LibrariansView {
         phoneNumberField.clear();
         salaryField.clear();
         accessLevelComboBox.getSelectionModel().clearSelection();
+        passwordField.clear();
     }
 }

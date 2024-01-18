@@ -30,13 +30,16 @@ public class UserDashboardView {
     private final LoginFormController loginFormController = new LoginFormController();
     User currentUser = loginFormController.getCurrentUser();
     static List<Book> books = new BookList().getReadBooks();
+    static List<String> roles;
 
     public static void showUserDashboard(Stage primaryStage, User currentUser) {
         Employee employee;
         if (currentUser instanceof Librarian) {
             employee = (Librarian) currentUser;
+            roles = Roles.getLibrarianRoles();
         } else if (currentUser instanceof Manager) {
             employee = (Manager) currentUser;
+            roles = Roles.getManagerRoles();
         } else {
             employee = null;
             if (currentUser instanceof Admin) {
@@ -44,25 +47,25 @@ public class UserDashboardView {
             }
         }
         Button btnProfile = new Button("Profile");
-        Button btnBooks = new Button();
-        if(currentUser instanceof Librarian)
-            btnBooks = new Button("Books");
-        else if(currentUser instanceof Manager)
-            btnBooks = new Button("Inventory");
+        Button btnBooks = new Button("Books");
         Button btnBill = new Button("Create bill");
+        Button btnInventory = new Button("Inventory");
         Button logoutButton = new Button("Logout");
 
         HBox hbox = new HBox(10); //spacing between buttons
-        hbox.getChildren().addAll(btnProfile, btnBooks, btnBill, logoutButton);
+        hbox.getChildren().addAll(btnProfile, btnBooks);
+        if(roles.contains("Create Bill"))
+            hbox.getChildren().add(btnBill);
+        if(roles.contains("Add new books"))
+            hbox.getChildren().add(btnInventory);
+        hbox.getChildren().add(logoutButton);
 
         btnProfile.setOnAction(e -> {
             assert employee != null;
             showProfileView(primaryStage, employee);
         });
-        if(currentUser instanceof Librarian)
-            btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
-        else if(currentUser instanceof Manager)
-            btnBooks.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
+        btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        btnInventory.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
         btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         VBox dashboardLayout = new VBox(20);
         dashboardLayout.setAlignment(Pos.TOP_CENTER);

@@ -61,6 +61,7 @@ public class AdminView {
         image.setFitWidth(390);
         btnLibrarians.setOnAction(e -> LibrariansView.showLibrariansTable(primaryStage, librarians));
         btnManagers.setOnAction(e -> ManagersView.showManagersTable(primaryStage, managers));
+        btnManageRoles.setOnAction(e -> ManageRolesView.showManageRoles(primaryStage, librarians, managers));
         UserDashboardController userController = new UserDashboardController();
         logoutButton.setOnAction(e -> {
             try {

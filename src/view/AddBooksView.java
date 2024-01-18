@@ -11,10 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import model.Author;
-import model.Book;
-import model.Category;
-import model.Employee;
+import model.*;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -24,22 +21,35 @@ import java.util.List;
 import static view.UserDashboardView.showAlert;
 
 public class AddBooksView {
+    static List<String> roles;
     static void showBooksTable(Stage primaryStage, List<Book> books, Employee employee) {
+        if (employee instanceof Librarian) {
+            roles = Roles.getLibrarianRoles();
+        } else if (employee instanceof Manager) {
+            roles = Roles.getManagerRoles();
+        }
         VBox dashboardLayout = new VBox(20);
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
-
+        Button btnBooks = new Button("Books");
         Button btnProfile = new Button("Profile");
-        Button btnBooks = new Button("Inventory");
         Button btnBill = new Button("Create bill");
+        Button btnInventory = new Button("Inventory");
         Button logoutButton = new Button("Logout");
 
         HBox hbox = new HBox(10); //spacing between buttons
-        hbox.getChildren().addAll(btnProfile, btnBooks,btnBill, logoutButton);
+        hbox.getChildren().addAll(btnProfile, btnBooks);
+        if(roles.contains("Create Bill"))
+            hbox.getChildren().add(btnBill);
+        if(roles.contains("Add new books"))
+            hbox.getChildren().add(btnInventory);
+        hbox.getChildren().add(logoutButton);
         btnProfile.setOnAction(e -> {
             assert employee != null;
             ProfileView.showProfileView(primaryStage, employee);
         });
+        btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        btnInventory.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
         btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
@@ -97,8 +107,11 @@ public class AddBooksView {
 
         authorColumn.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setAuthor(e.getNewValue()));
 
-        tableView.getColumns().addAll(ISBNColumn, titleColumn, authorColumn, yearColumn, supplierColumn, categoryColumn, costColumn, initialPriceColumn, sellingPriceColumn, stockNoColumn, dateColumn, editColumn, deleteColumn);
-
+        tableView.getColumns().addAll(ISBNColumn, titleColumn, authorColumn, yearColumn, supplierColumn, categoryColumn, costColumn, initialPriceColumn, sellingPriceColumn, stockNoColumn, dateColumn);
+        if(roles.contains("Edit books"))
+            tableView.getColumns().add(editColumn);
+        if(roles.contains("Update books"))
+            tableView.getColumns().add(deleteColumn);
         ObservableList<Book> bookData = FXCollections.observableArrayList(books);
 
         tableView.setItems(bookData);

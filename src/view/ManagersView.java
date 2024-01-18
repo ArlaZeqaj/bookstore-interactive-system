@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.AccessLevel;
+import model.Librarian;
 import model.Manager;
 
 import java.io.FileOutputStream;
@@ -49,6 +50,7 @@ public class ManagersView {
         });
 
         btnLibrarians.setOnAction(e -> LibrariansView.showLibrariansTable(primaryStage, librarians));
+        btnManageRoles.setOnAction(e -> ManageRolesView.showManageRoles(primaryStage, librarians, managers));
 
         Label titleLabel = new Label("Manager List");
         titleLabel.getStyleClass().add("text-header");
@@ -61,8 +63,10 @@ public class ManagersView {
         TableColumn<Manager, String> emailColumn = new TableColumn<>("Email");
         TableColumn<Manager, Double> salaryColumn = new TableColumn<>("Salary");
         TableColumn<Manager, AccessLevel> accessLevelColumn = new TableColumn<>("Access Level");
+        TableColumn<Manager, String> passwordColumn = new TableColumn<>("Password");
 
         tableView.setId("tableView");
+        tableView.setPrefWidth(1000);
 
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         surnameColumn.setCellValueFactory(new PropertyValueFactory<>("surname"));
@@ -71,8 +75,9 @@ public class ManagersView {
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         salaryColumn.setCellValueFactory(new PropertyValueFactory<>("salary"));
         accessLevelColumn.setCellValueFactory(new PropertyValueFactory<>("accessLevel"));
+        passwordColumn.setCellValueFactory(new PropertyValueFactory<>("password"));
 
-        tableView.getColumns().addAll(nameColumn, surnameColumn, birthDateColumn, phoneNumberColumn, emailColumn, salaryColumn, accessLevelColumn);
+        tableView.getColumns().addAll(nameColumn, surnameColumn, birthDateColumn, phoneNumberColumn, emailColumn, salaryColumn, accessLevelColumn, passwordColumn);
 
         ObservableList<Manager> managerData = FXCollections.observableArrayList(managers);
 
@@ -85,11 +90,12 @@ public class ManagersView {
         TextField phoneNumberField = new TextField();
         TextField salaryField = new TextField();
         ComboBox<AccessLevel> accessLevelComboBox = new ComboBox<>(FXCollections.observableArrayList(AccessLevel.values()));
+        TextField passwordField = new TextField();
 
         Button addEmployeeButton = new Button("Add Employee");
         addEmployeeButton.setOnAction(e -> {
             try {
-                addEmployeeToTableView(tableView, managers, nameField, surnameField, birthDateField, phoneNumberField, salaryField, accessLevelComboBox);
+                addEmployeeToTableView(tableView, managers, nameField, surnameField, birthDateField, phoneNumberField, salaryField, accessLevelComboBox, passwordField);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -105,6 +111,7 @@ public class ManagersView {
                 new HBox(10, new Label("Phone Number:"), phoneNumberField),
                 new HBox(10, new Label("Salary:"), salaryField),
                 new HBox(10, new Label("Access Level:"), accessLevelComboBox),
+                new HBox(10, new Label("Password:"), passwordField),
                 addEmployeeButton
         );
 
@@ -118,13 +125,14 @@ public class ManagersView {
         primaryStage.setScene(dashboardScene);
     }
 
-    private static void addEmployeeToTableView(TableView<Manager> tableView, List<Manager> managers, TextField nameField, TextField surnameField, DatePicker birthDateField, TextField phoneNumberField, TextField salaryField, ComboBox<AccessLevel> accessLevelComboBox) throws IOException {
+    private static void addEmployeeToTableView(TableView<Manager> tableView, List<Manager> managers, TextField nameField, TextField surnameField, DatePicker birthDateField, TextField phoneNumberField, TextField salaryField, ComboBox<AccessLevel> accessLevelComboBox, TextField passwordField) throws IOException {
         String name = nameField.getText();
         String surname = surnameField.getText();
         LocalDate birthDate = birthDateField.getValue();
         String phoneNumber = phoneNumberField.getText();
         double salary = Double.parseDouble(salaryField.getText());
         AccessLevel accessLevel = accessLevelComboBox.getValue();
+        String password = passwordField.getText();
 
         Manager newEmployee = new Manager(name, surname, birthDate, phoneNumber, salary, "password");
 
@@ -143,5 +151,6 @@ public class ManagersView {
         phoneNumberField.clear();
         salaryField.clear();
         accessLevelComboBox.getSelectionModel().clearSelection();
+        passwordField.clear();
     }
 }

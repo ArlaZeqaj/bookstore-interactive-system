@@ -11,12 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import model.Bill;
-import model.BillUnit;
-import model.Book;
-import model.Employee;
-import model.Librarian;
-import model.Manager;
+import model.*;
 import model.Utility.FileReaderUtil;
 import model.Utility.FileWriterUtil;
 import java.util.Optional;
@@ -35,31 +30,37 @@ import java.util.Optional;
 import static view.UserDashboardView.*;
 
 public class AddBillView {
+    static List<String> roles;
     static void createBillTable(Stage primaryStage, List<Book> books, Employee employee) {
+        if (employee instanceof Librarian) {
+            roles = Roles.getLibrarianRoles();
+        } else if (employee instanceof Manager) {
+            roles = Roles.getManagerRoles();
+        }
         VBox dashboardLayout = new VBox(20);
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
 
+        Button btnBooks = new Button("Books");
         Button btnProfile = new Button("Profile");
-        Button btnBooks = new Button();
-        if(employee instanceof Librarian)
-            btnBooks = new Button("Books");
-        else if(employee instanceof Manager)
-            btnBooks = new Button("Inventory");
         Button btnBill = new Button("Create bill");
+        Button btnInventory = new Button("Inventory");
         Button logoutButton = new Button("Logout");
 
         HBox hbox = new HBox(10); //spacing between buttons
-        hbox.getChildren().addAll(btnProfile, btnBooks,btnBill, logoutButton);
+        hbox.getChildren().addAll(btnProfile, btnBooks);
+        if(roles.contains("Create Bill"))
+            hbox.getChildren().add(btnBill);
+        if(roles.contains("Add new books"))
+            hbox.getChildren().add(btnInventory);
+        hbox.getChildren().add(logoutButton);
         btnProfile.setOnAction(e -> {
             assert employee != null;
             ProfileView.showProfileView(primaryStage, employee);
         });
-        if(employee instanceof Librarian)
-            btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
-        else if(employee instanceof Manager)
-            btnBooks.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
-        btnBill.setOnAction(e -> showAlert("Settings button clicked"));
+        btnBooks.setOnAction(e -> BooksView.showBooksTable(primaryStage, books, employee));
+        btnInventory.setOnAction(e -> AddBooksView.showBooksTable(primaryStage, books, employee));
+        btnBill.setOnAction(e -> AddBillView.createBillTable(primaryStage, books, employee));
         dashboardLayout.setAlignment(Pos.TOP_CENTER);
         dashboardLayout.setPadding(new Insets(10, 10, 10, 10));
 
@@ -174,7 +175,6 @@ public class AddBillView {
                         System.out.println("IOException: " + e.getMessage());
                         e.printStackTrace();
                     }
-
                     //update stock numbers in the binary file
                     updateStockNumbersInBinaryFile(bill);
                 } else {
