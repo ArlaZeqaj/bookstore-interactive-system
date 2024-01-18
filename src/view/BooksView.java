@@ -17,8 +17,6 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 
-import static view.UserDashboardView.filterBooks;
-
 public class BooksView {
     static void showBooksTable(Stage primaryStage, List<Book> books, Employee employee) {
         VBox dashboardLayout = new VBox(20);
@@ -93,7 +91,7 @@ public class BooksView {
         searchField.setMaxWidth(350);
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            tableView.setItems(filterBooks(bookData, newValue));
+            tableView.setItems(UserDashboardController.filterBooks(bookData, newValue));
         });
 
         dashboardLayout.getChildren().clear();

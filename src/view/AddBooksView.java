@@ -15,7 +15,6 @@ import model.Author;
 import model.Book;
 import model.Category;
 import model.Employee;
-import model.Utility.FileWriterUtil;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -68,7 +67,10 @@ public class AddBooksView {
         TableColumn<Book, Integer> stockNoColumn = new TableColumn<>("Stock");
         TableColumn<Book, String> supplierColumn = new TableColumn<>("Supplier");
         TableColumn<Book, LocalDate> dateColumn = new TableColumn<>("Date");
+        TableColumn<Book, String> editColumn = new TableColumn<>("Edit");
+        TableColumn<Book, Void> deleteColumn = new TableColumn<>("Delete");
 
+        tableView.setPrefWidth(1400);
         tableView.setId("tableView");
 
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -95,7 +97,7 @@ public class AddBooksView {
 
         authorColumn.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setAuthor(e.getNewValue()));
 
-        tableView.getColumns().addAll(ISBNColumn, titleColumn, authorColumn, yearColumn, supplierColumn, categoryColumn, costColumn, initialPriceColumn, sellingPriceColumn, stockNoColumn, dateColumn);
+        tableView.getColumns().addAll(ISBNColumn, titleColumn, authorColumn, yearColumn, supplierColumn, categoryColumn, costColumn, initialPriceColumn, sellingPriceColumn, stockNoColumn, dateColumn, editColumn, deleteColumn);
 
         ObservableList<Book> bookData = FXCollections.observableArrayList(books);
 
@@ -115,6 +117,48 @@ public class AddBooksView {
         TextField sellingPriceField = new TextField();
         TextField stockField = new TextField();
 
+        editColumn.setCellFactory(col -> {
+            TableCell<Book, String> cell = new TableCell<>() {
+                final Button editButton = new Button("Edit");
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setGraphic(null);
+                        setText(null);
+                    } else {
+                        editButton.setOnAction(event -> {
+                            Book selectedBook = getTableView().getItems().get(getIndex());
+                            Author selectedAuthor = new Author(authorColumn.getCellData(getIndex()));
+                            selectedAuthor.extractNamesFromText(authorColumn.getCellData(getIndex()));
+                            populateFormFields(selectedBook, selectedAuthor, isbnField, titleField, firstNameField, middleNameField, lastNameField, categoryField, supplierField, yearField, purchasedPriceField, originalPriceField, sellingPriceField, stockField);
+                        });
+                        setGraphic(editButton);
+                        setText(null);
+                    }
+                }
+            };
+            return cell;
+        });
+        deleteColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button deleteButton = new Button("Delete");
+            {
+                deleteButton.setOnAction(event -> {
+                    Book book = getTableView().getItems().get(getIndex());
+                    deleteBook(tableView, books, book, isbnField, titleField, firstNameField, middleNameField, lastNameField, categoryField, supplierField, yearField, purchasedPriceField, originalPriceField, sellingPriceField, stockField);
+                });
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(deleteButton);
+                }
+            }
+        });
+
         Button addBookButton = new Button("Add Book");
         addBookButton.setOnAction(e -> {
             try {
@@ -123,6 +167,15 @@ public class AddBooksView {
                 throw new RuntimeException(ex);
             }
             showAlert("Book " + titleField.getText() + " added successfully!");
+        });
+        Button updateBookButton = new Button("Update Book");
+        updateBookButton.setOnAction(e -> {
+            try {
+                updateBookInTableView(tableView, books, isbnField, titleField, firstNameField, middleNameField, lastNameField, categoryField, supplierField, yearField, purchasedPriceField, originalPriceField, sellingPriceField, stockField);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            showAlert("Book " + titleField.getText() + " updated successfully!");
         });
         VBox addBookForm = new VBox(10);
         addBookForm.getChildren().addAll(
@@ -139,7 +192,8 @@ public class AddBooksView {
                 new HBox(10, new Label("Original price:"), originalPriceField),
                 new HBox(10, new Label("Selling price:"), sellingPriceField),
                 new HBox(10, new Label("Stock number:"), stockField),
-                addBookButton
+                addBookButton,
+                updateBookButton
                 );
 
         dashboardLayout.getChildren().clear();
@@ -170,17 +224,87 @@ public class AddBooksView {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        isbnField.clear();
-        titleField.clear();
-        firstNameField.clear();
-        middleNameField.clear();
-        lastNameField.clear();
-        categoryField.clear();
-        supplierField.clear();
-        yearField.clear();
-        purchasedPriceField.clear();
-        originalPriceField.clear();
-        sellingPriceField.clear();
-        stockField.clear();
+
+        Book selectedBook = tableView.getSelectionModel().getSelectedItem();
+
+        if (selectedBook != null) {
+            int selectedIndex = books.indexOf(selectedBook);
+            books.set(selectedIndex, newBook);
+
+            tableView.getItems().set(selectedIndex, newBook);
+
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("data/binaryFiles/books.bin"))) {
+                oos.writeObject(books);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            showAlert("Book " + titleField.getText() + " created successfully!");
+        } else {
+            showAlert("Please select a book to edit.");
+        }
+        clearFormFields(isbnField, titleField, firstNameField, middleNameField, lastNameField, categoryField, supplierField, yearField, purchasedPriceField, originalPriceField, sellingPriceField, stockField);
     }
+    private static void populateFormFields(Book selectedBook, Author selectedAuthor, TextField isbnField, TextField titleField, TextField firstNameField, TextField middleNameField, TextField lastNameField, TextField categoryField, TextField supplierField, TextField yearField, TextField purchasedPriceField, TextField originalPriceField, TextField sellingPriceField, TextField stockField) {
+        isbnField.setText(selectedBook.getISBN());
+        titleField.setText(selectedBook.getTitle());
+        firstNameField.setText(selectedAuthor.getFirstName());
+        middleNameField.setText(selectedAuthor.getMiddleName());
+        lastNameField.setText(selectedAuthor.getLastName());
+        categoryField.setText(selectedBook.getCategory());
+        supplierField.setText(selectedBook.getSupplierName());
+        yearField.setText(String.valueOf(selectedBook.getPublishYear()));
+        purchasedPriceField.setText(String.valueOf(selectedBook.getPurchasedPrice()));
+        originalPriceField.setText(String.valueOf(selectedBook.getOriginalPrice()));
+        sellingPriceField.setText(String.valueOf(selectedBook.getSellingPrice()));
+        stockField.setText(String.valueOf(selectedBook.getStockNo()));
+    }
+    private static void updateBookInTableView(TableView<Book> tableView, List<Book> books, TextField isbnField, TextField titleField, TextField firstNameField, TextField middleNameField, TextField lastNameField, TextField categoryField, TextField supplierField, TextField yearField, TextField purchasedPriceField, TextField originalPriceField, TextField sellingPriceField, TextField stockField) throws IOException {
+        Book selectedBook = tableView.getSelectionModel().getSelectedItem();
+
+        if (selectedBook != null) {
+            books.remove(selectedBook);
+            tableView.getItems().remove(selectedBook);
+
+            String isbn = isbnField.getText();
+            String title = titleField.getText();
+            Category category = new Category(categoryField.getText());
+            String supplier = supplierField.getText();
+            Year publishYear = Year.parse(yearField.getText());
+            double purchasedPrice = Double.parseDouble(purchasedPriceField.getText());
+            double originalPrice = Double.parseDouble(originalPriceField.getText());
+            double sellingPrice = Double.parseDouble(sellingPriceField.getText());
+            Author author = new Author(firstNameField.getText(), middleNameField.getText(), lastNameField.getText());
+            int stock = Integer.parseInt(stockField.getText());
+            Book updatedBook = new Book(isbn, title, category, supplier, publishYear, purchasedPrice, originalPrice, sellingPrice, author, stock);
+
+            books.add(updatedBook);
+            tableView.getItems().add(updatedBook);
+
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("data/binaryFiles/books.bin"))) {
+                oos.writeObject(books);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            clearFormFields(isbnField, titleField, firstNameField, middleNameField, lastNameField, categoryField, supplierField, yearField, purchasedPriceField, originalPriceField, sellingPriceField, stockField);
+        }
+    }
+    private static void deleteBook(TableView<Book> tableView, List<Book> books, Book book, TextField isbnField, TextField titleField, TextField firstNameField, TextField middleNameField, TextField lastNameField, TextField categoryField, TextField supplierField, TextField yearField, TextField purchasedPriceField, TextField originalPriceField, TextField sellingPriceField, TextField stockField) {
+        tableView.getItems().remove(book);
+        books.remove(book);
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("data/binaryFiles/books.bin"))) {
+            oos.writeObject(books);
+            showAlert(book.getTitle() + " deleted successfully!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        clearFormFields(isbnField, titleField, firstNameField, middleNameField, lastNameField, categoryField, supplierField, yearField, purchasedPriceField, originalPriceField, sellingPriceField, stockField);
+    }
+
+    private static void clearFormFields(TextField... fields) {
+        for (TextField field : fields) {
+            field.clear();
+        }
+    }
+
 }

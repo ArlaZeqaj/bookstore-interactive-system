@@ -109,7 +109,7 @@ public class AddBillView {
         searchField.setPromptText("Search by title, ISBN, author or category...");
         searchField.setMaxWidth(600);
 
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> tableView.setItems(filterBooks(bookData, newValue)));
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> tableView.setItems(UserDashboardController.filterBooks(bookData, newValue)));
 
         Label quantityLabel = new Label("Quantity:");
         Spinner<Integer> quantitySpinner = new Spinner<>(1, 100, 1);

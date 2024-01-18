@@ -90,4 +90,21 @@ public class Author implements Serializable{
             }
         }
     }
+    //extract the author first/last/middlename from a string
+    public void extractNamesFromText(String text) {
+        String[] nameParts = text.split("\\s+");
+        if (nameParts.length > 0) {
+            setFirstName(nameParts[0]);
+        }
+        if (nameParts.length > 1) {
+            setLastName(nameParts[nameParts.length - 1]);
+        }
+        if (nameParts.length > 2) {
+            StringBuilder middleNameBuilder = new StringBuilder();
+            for (int i = 1; i < nameParts.length - 1; i++) {
+                middleNameBuilder.append(nameParts[i]).append(" ");
+            }
+            setMiddleName(middleNameBuilder.toString().trim());
+        }
+    }
 }

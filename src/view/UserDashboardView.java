@@ -2,13 +2,10 @@ package view;
 
 import controller.LoginFormController;
 import controller.UserDashboardController;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -20,7 +17,6 @@ import model.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
-import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
@@ -113,29 +109,9 @@ public class UserDashboardView {
         alert.setTitle("User Dashboard");
         alert.setHeaderText(null);
         alert.setContentText(message);
-
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.setId("custom-alert");
         dialogPane.getStylesheets().add(UserDashboardView.class.getResource("styles.css").toExternalForm());
-
         alert.showAndWait();
-    }
-    static ObservableList<Book> filterBooks(ObservableList<Book> originalList, String searchText) {
-        if (searchText == null || searchText.trim().isEmpty()) {
-            return originalList;
-        }
-        String lowerCaseFilter = searchText.toLowerCase();
-
-        ObservableList<Book> filteredList = FXCollections.observableArrayList();
-
-        for (Book book : originalList) {
-            if (book.getTitle().toLowerCase().contains(lowerCaseFilter) ||
-                    String.valueOf(book.getISBN()).contains(lowerCaseFilter) ||
-                    book.getAuthor().toString().toLowerCase().contains(lowerCaseFilter) ||
-                    book.getCategory().toLowerCase().contains(lowerCaseFilter)) {
-                filteredList.add(book);
-            }
-        }
-        return filteredList;
     }
 }
