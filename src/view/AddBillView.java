@@ -25,7 +25,6 @@ import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
-import java.util.Optional;
 
 import static view.UserDashboardView.*;
 
